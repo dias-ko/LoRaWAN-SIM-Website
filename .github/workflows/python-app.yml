@@ -39,11 +39,10 @@ jobs:
     - name: Install Modules
       run: |
         cpan -v
-        cpan
-        install GD
-        install Math::Random
-        install Term::ProgressBar
-        install Statistics::Basic
+        cpan install GD
+        cpan install Math::Random
+        cpan install Term::ProgressBar
+        cpan install Statistics::Basic
 
   build:
 
