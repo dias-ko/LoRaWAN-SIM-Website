@@ -38,7 +38,13 @@ jobs:
  
     - name: Install Modules
       run: |
-        cpan -v
+        wget https://github.com/libgd/libgd/releases/download/gd-2.2.5/libgd-2.2.5.tar.gz
+        tar zxvf libgd-2.2.5.tar.gz
+        cd libgd-2.2.5
+        ./configure 
+        make
+        make install
+        make installcheck
         cpan install GD
         cpan install Math::Random
         cpan install Term::ProgressBar
