@@ -120,7 +120,3 @@ def simulate():
     else:
         session["result"] = None
     return render_template('index.html', form=form, message=message, result=session["result"], img_file=session["image"], tab="Simulate")
-
-
-if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0")
