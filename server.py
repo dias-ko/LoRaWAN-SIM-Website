@@ -1,5 +1,5 @@
-import subprocess, random, datetime, os, re
-from flask import Flask, render_template, redirect, url_for, request, session
+import subprocess, datetime, os, re
+from flask import Flask, render_template, redirect, session
 from flask_bootstrap import Bootstrap5
 from flask_session import Session
 from flask_wtf import FlaskForm, CSRFProtect
@@ -120,3 +120,7 @@ def simulate():
     else:
         session["result"] = None
     return render_template('index.html', form=form, message=message, result=session["result"], img_file=session["image"], tab="Simulate")
+
+
+if __name__ == "__main__":
+    app.run(debug=False, host="0.0.0.0")
