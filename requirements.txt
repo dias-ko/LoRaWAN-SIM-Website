@@ -3,3 +3,4 @@ bootstrap-flask
 flask_session
 flask_wtf
 wtforms
+gunicorn
