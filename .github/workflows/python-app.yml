@@ -38,8 +38,12 @@ jobs:
  
     - name: Install Modules
       run: |
-        cpanm -v
-        cpanm --installdeps --notest .
+        cpan -v
+        cpan
+        install GD
+        install Math::Random
+        install Term::ProgressBar
+        install Statistics::Basic
 
   build:
 
