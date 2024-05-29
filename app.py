@@ -112,8 +112,8 @@ def index():
         file = 'terrains/' + timestamp_str + '.txt'
         img_file = 'imgs/' + timestamp_str + '.png'
         try:
-            subprocess.run(['perl', 'generate_terrain.pl', str(size), str(nodes), str(gateways), '>', file], shell=True)
-            subprocess.run(['perl', 'draw_terrain.pl', file, img_file], shell=True)
+            subprocess.run(['perl generate_terrain.pl ' + str(size) + ' ' + str(nodes) + ' ' + str(gateways) + ' > ' + file], shell=True)
+            subprocess.run(['perl draw_terrain.pl' + ' ' + file + ' ' + img_file], shell=True)
             new_session = Sessions(timestamp, file, img_file)
             db.session.add(new_session)
             db.session.commit()
@@ -156,7 +156,7 @@ def simulate():
         script_name = 'LoRaWAN.pl' if form.frequency.data == 'eu' else 'LoRaWAN-US915.pl'
         if os.path.exists(file): 
             try:
-                res = subprocess.check_output(['perl', script_name, str(packets_per_hour), str(simulation_time), str(ack_policy), file, str(max_retr), str(channels), str(rx2sf), str(fixed_packet_size), str(packet_size_distr), str(auto_simtime), str(packet_size), str(confirmed_perc)], shell=True)
+                res = subprocess.check_output(['perl ' + script_name + ' ' + str(packets_per_hour) + ' ' + str(simulation_time) + ' ' + str(ack_policy) + ' ' + file + ' ' + str(max_retr) + ' ' + str(channels) + ' ' + str(rx2sf) + ' ' + str(fixed_packet_size) + ' ' + str(packet_size_distr) + ' ' + str(auto_simtime) + ' ' + str(packet_size) + ' ' + str(confirmed_perc)], shell=True)
                 session['result'] = parse_res(res)
             except subprocess.CalledProcessError as e:
                 message = e
