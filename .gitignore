@@ -2,7 +2,7 @@
 venv*/
 __pycache__/
 flask_session/
-terrains/
-imgs/
+terrains/*
+imgs/*
 test.py
-LoRaWAN-US915.pl
+instance/

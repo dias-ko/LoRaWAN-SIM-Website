@@ -2,33 +2,48 @@
 {% from 'bootstrap5/form.html' import render_form %}
 
 {% block content %}
-<div class="container-md" style="width: 640px;">
-
-  <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);" aria-label="breadcrumb">
+<div class="container-md">
+  <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
       {% if tab == 'Generate' %}
-      <li class="breadcrumb-item active">Generate</a></li>
-      <!-- <li class="breadcrumb-item active"></a>Simulate</li> -->
+      <li class="breadcrumb-item">
+        <u>Generate</u></li>
+      <li class="breadcrumb-item">
+          <span class="text-secondary">Simulate</span></li>
       {% else %}
-      <li class="breadcrumb-item"><a href="/">Generate</a></li>
-      <li class="breadcrumb-item active"></a>Simulate</li>
+      <li class="breadcrumb-item">
+        <a class="text-secondary" href="/" style="text-decoration: none;">Generate</a></li>
+      <li class="breadcrumb-item">
+        <u>Simulate</u></li>
       {% endif %}
     </ol>
   </nav>
+</div>
+
+<div class="container-md">
+  <div class="row align-items-start">
+    <div class="col-7 border rounded overflow-auto p-3 m-1" style="Height: 75vh">
   
   {% if message %}
-  <div class="alert alert-warning" role="alert"> {{ message }} </div>
-  {% endif %}
-
-  {% if img_file %}
-    <h2>Terrain</h2>
-    <img src="{{ img_file }}" alt="Terrain image" class="img mb-3">
-  {% endif %}
+      <div class="alert alert-warning" role="alert"> {{ message }} </div>
+    {% endif %}
+      {{ render_form(form) }}
   
-  {{ render_form(form) }}
-  </br>
-    {% if result %}
-    <h2>Simulation Statistics</h2>
+    </div>
+    <div class="col m-1 results overflow-auto">
+      {% if img_file %}
+      <div class="row" style="display: flex; justify-content: center; align-items: center;">
+        <img src="{{ img_file }}" alt="Terrain image" class="img img-thumbnail">
+      </div>
+        {% if tab == 'Generate' %}
+      <div class="row">
+        <a class="btn btn-primary next" href="/simulate" role="button">Next</a>
+      </div>
+        {% endif %}
+      {% endif %}
+      
+  {% if result %}
+    <h2 class="mt-3">Simulation Statistics</h2>
     <div class="accordion mb-3" id="accordionExample">
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingOne">
@@ -39,7 +54,7 @@
         <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne">
           <div class="accordion-body">
             <div class="stat"><span>Simulation time</span><span>{{ result["Simulation time"] }}</span></div>
-            <div class="stat"><span>Total downlink time</span><span>{{ result["Total downlink time"] }}</span></div>
+            <div class="stat"><span>Total downlink time</span><span>{{ result["Total downlink time"] }} secs</span></div>
             <div class="stat"><span>Script execution time</span><span>{{ result["Script execution time"] }}</span></div>
           </div>
         </div>
@@ -129,9 +144,13 @@
       </div>
     </div>
 </div>
-    {% endif %}
 
+<div class="row mt-3">
+  <a class="btn btn-primary next" href="/" role="back">Back</a>
+</div>
+{% endif %}
 
+{% if tab == 'Simulate' %}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
       const checkbox = document.getElementById('fixed');
@@ -139,21 +158,41 @@
       const size = document.getElementById('size').parentElement.querySelector("label");
       const auto_sim = document.getElementById('auto_sim');
       const sim = document.getElementById('sim');
+      const freq0 = document.getElementById('freq-0');
+      const freq1 = document.getElementById('freq-1');
+      const options = document.getElementById('policy');
+      const option3 = document.getElementById('policy').lastElementChild;
+      const channels = document.getElementById('channels')
 
-      ["change", "load"].forEach(function(e){
-        checkbox.addEventListener(e,function() {
-          if (checkbox.checked) {
-            // distr.classList.add("visually-hidden");
+      if (checkbox.checked) {
+          distr.disabled = true;
+          size.innerText = "Packet Size";
+        } else {
+          distr.disabled = false;
+          size.innerText = "Average Packet Size";
+      }
+
+      if (auto_sim.checked) {
+          sim.disabled = true;
+      } else {
+          sim.disabled = false;
+      }
+
+      if (freq1.checked) {
+        channels.disabled = true;
+        option3.disabled = true;
+      }
+
+      checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
             distr.disabled = true;
             size.innerText = "Packet Size";
           } else {
-            // distr.classList.remove("visually-hidden");
             distr.disabled = false;
             size.innerText = "Average Packet Size";
           }
-        });
       });
-
+      
       auto_sim.addEventListener('change', function() {
           if (auto_sim.checked) {
             sim.disabled = true;
@@ -161,8 +200,24 @@
             sim.disabled = false;
           }
       });
+
+      freq0.addEventListener('change', function() {
+          if (freq0.checked) {
+            channels.disabled = false;
+            option3.disabled = false;
+          }
+      });
+
+      freq1.addEventListener('change', function() {
+          if (freq1.checked) {
+            channels.disabled = true;
+            option3.disabled = true;
+            options.firstChild.selected = true;
+          }
+      });
   });
 </script>
+{% endif %}
 
 <style>
   .bar-chart {
@@ -221,9 +276,22 @@
       background-color: #f9f9f9;
   }
   .img {
-    max-width: 100%;
-    max-height: 100%;
-} 
+    width: 100%;
+    height: auto;
+    max-width: 500px;
+    object-fit: contain;
+}
+.next {
+    width: 100%;
+    align-self: center;
+}
+.results {
+  width: auto;
+  Height: 75vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
 
 </style>
 
