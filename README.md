@@ -2,7 +2,7 @@
 
 ## 1. Update the System (Optional)
 ```bash
-sudo apt update # Optional
+sudo apt update
 ```
 
 ## 2. Clone the project and open the folder
