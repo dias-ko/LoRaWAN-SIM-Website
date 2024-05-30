@@ -5,7 +5,7 @@
 sudo apt update
 ```
 
-## 2. Clone the project and open the folder
+## 2. Clone the Project and Open the Folder
 ```bash
 git clone <repository-url>
 cd <repository-folder>
@@ -29,12 +29,12 @@ from app import db
 db.create_all()
 ```
 
-## 6. Install perl (if not installed):
+## 6. Install Perl (if not installed):
 ```
 curl -L http://xrl.us/installperlnix | bash
 ```
 
-## 7. install perl modules:
+## 7. Install Perl Modules:
 ```bash
 sudo apt-get install libgd-dev 
 sudo apt-get install libgd-perl # for GD
@@ -49,7 +49,7 @@ install GD::SVG
 install Statistics::Basic
 ```
 
-## 8. Create folders for generated files:
+## 8. Create Folders for Generated Files:
 ```
 mkdir terrains
 mkdir imgs
