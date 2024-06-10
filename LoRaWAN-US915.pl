@@ -33,19 +33,19 @@ use Term::ProgressBar 2.00;
 use GD::SVG;
 use Statistics::Basic qw(:all);
 
-die "usage: ./LoRaWAN-US915.pl <packets_per_hour> <simulation_time(secs)> <gateway_selection_policy(0-5)> <terrain_file!> <max_retr> <channels> <rx2sf> <fixed_packet_size> <packet_size_distr> <auto_simtime> <packet_size> <confirmed_perc>\n" unless (scalar @ARGV == 12);
+die "usage: ./LoRaWAN-US915.pl <packets_per_hour> <simulation_time(secs)> <gateway_selection_policy(0-5)> <max_retr> <channels> <rx2sf> <fixed_packet_size> <packet_size_distr> <auto_simtime> <packet_size> <confirmed_perc> <terrain_file>\n" unless (scalar @ARGV == 12);
 
 die "Packet rate must be higher than or equal to 1pkt per hour\n" if ($ARGV[0] < 1);
 die "Simulation time must be longer than or equal to 1h\n" if ($ARGV[1] < 3600);
 die "Gateway selection policy must be between 1 and 2!\n" if (($ARGV[2] < 1) || ($ARGV[2] > 2));
-die "Max retry number must be between 1 and 8!\n" if (($ARGV[4] < 1) || ($ARGV[4] > 8));
-# die "Channels number must be 3 or 8!\n" if (($ARGV[5] != 3) && ($ARGV[5] != 8));  ?????????
-die "rx2sf must be between 7 and 12!\n" if (($ARGV[6] < 7) || ($ARGV[6] > 12));
-die "fixed_packet_size must be 0 or 1!\n" if (($ARGV[7] != 0) && ($ARGV[7] != 1));
-die "packet_size_distr must be normal or uniform!\n" if (($ARGV[8] ne "normal") && ($ARGV[8] ne "uniform"));
-die "auto_simtime must be 0 or 1!\n" if (($ARGV[9] != 0) && ($ARGV[9] != 1));
-die "Packet size must be positive!\n" if ($ARGV[10] < 1);
-die "Confirmed percentage must be between 0 and 1!\n" if (($ARGV[11] < 0) && ($ARGV[11] > 1));
+die "Max retry number must be between 1 and 8!\n" if (($ARGV[3] < 1) || ($ARGV[3] > 8));
+# die "Channels number must be 3 or 8!\n" if (($ARGV[4] != 3) && ($ARGV[4] != 8));  ?????????
+die "rx2sf must be between 7 and 12!\n" if (($ARGV[5] < 7) || ($ARGV[5] > 12));
+die "fixed_packet_size must be 0 or 1!\n" if (($ARGV[6] != 0) && ($ARGV[6] != 1));
+die "packet_size_distr must be normal or uniform!\n" if (($ARGV[7] ne "normal") && ($ARGV[7] ne "uniform"));
+die "auto_simtime must be 0 or 1!\n" if (($ARGV[8] != 0) && ($ARGV[8] != 1));
+die "Packet size must be positive!\n" if ($ARGV[9] < 1);
+die "Confirmed percentage must be between 0 and 1!\n" if (($ARGV[10] < 0) && ($ARGV[10] > 1));
 
 # node attributes
 my %ncoords = (); # node coordinates
@@ -73,7 +73,7 @@ my @sensis = ([7,-124,-122,-116], [8,-127,-125,-119], [9,-130,-128,-122], [10,-1
 my @thresholds = ([1,-8,-9,-9,-9,-9], [-11,1,-11,-12,-13,-13], [-15,-13,1,-13,-14,-15], [-19,-18,-17,1,-17,-18], [-22,-22,-21,-20,1,-20], [-25,-25,-25,-24,-23,1]); # capture effect power thresholds per SF[SF] for non-orthogonal transmissions
 my $var = 3.57; # variance
 my ($dref, $Lpld0, $gamma) = (40, 110, 2.08); # attenuation model parameters
-my $max_retr = $ARGV[4]; # max number of retransmissions per packet (default value = 1)
+my $max_retr = $ARGV[3]; # max number of retransmissions per packet (default value = 1)
 my $bw_125 = 125000; # channel bandwidth
 my $bw_500 = 500000; # channel bandwidth
 my $cr = 1; # Coding Rate
@@ -83,7 +83,7 @@ my $Prx_w = 46 * 3.3;
 my $Pidle_w = 30 * 3.3; # this is actually the consumption of the microcontroller in idle mode
 my @channels = (902300000, 902500000, 902700000, 902900000, 903100000, 903300000, 903500000, 903700000, 903900000, 904100000, 904300000, 904500000, 904700000, 904900000, 905100000, 905300000, 905500000, 905700000, 905900000, 906100000, 906300000, 906500000, 906700000, 906900000, 907100000, 907300000, 907500000, 907700000, 907900000, 908100000, 908300000, 908500000, 908700000, 908900000, 909100000, 909300000, 909500000, 909700000, 909900000, 910100000, 910300000, 910500000, 910700000, 910900000, 911100000, 911300000, 911500000, 911700000, 911900000, 912100000, 912300000, 912500000, 912700000, 912900000, 913100000, 913300000, 913500000, 913700000, 913900000, 914100000, 914300000, 914500000, 914700000, 914900000, 903000000, 904600000, 906200000, 907800000, 909400000, 911000000, 912600000, 914200000); # 64x125kHz (only SF7-10) + 8x500kHz (only SF8) uplink channels
 my @channels_d = (923300000, 923900000, 924500000, 925100000, 925700000, 926300000, 926900000, 927500000); # 8x500kHz downlink channels (all SFs)
-my $rx2sf = $ARGV[6]; # SF used for RX2 (500kHz)
+my $rx2sf = $ARGV[5]; # SF used for RX2 (500kHz)
 my $rx2ch = 923300000; # channel used for RX2
 
 # packet specific parameters
@@ -104,7 +104,7 @@ my $overhead_d = $mhdr+$mic+$fhdr+$fport_d+$hcrc; # LoRa+LoRaWAN downlink overhe
 my %overlaps = (); # handles special packet overlaps 
 
 # simulation parameters
-my $confirmed_perc = $ARGV[11]; # percentage of nodes that require confirmed transmissions (1=all)
+my $confirmed_perc = $ARGV[10]; # percentage of nodes that require confirmed transmissions (1=all)
 my $full_collision = 1; # take into account non-orthogonal SF transmissions or not
 my $period = 3600/$ARGV[0]; # time period between transmissions
 my $sim_time = $ARGV[1]; # given simulation time
@@ -125,13 +125,13 @@ my $total_down_time = 0; # total downlink time
 my $progress_bar = 0; # activate progress bar (slower!)
 my $avg_sf = 0;
 my @sf_distr = (0, 0, 0, 0, 0, 0);
-my $fixed_packet_size = $ARGV[7]; # all nodes have the same packet size defined in @fpl (=1) or a randomly selected (=0)
-my $packet_size = $ARGV[10]; # default packet size if fixed_packet_size=1 or avg packet size if fixed_packet_size=0 (Bytes)
-my $packet_size_distr = $ARGV[8]; # uniform / normal (applicable if fixed_packet_size=0)
+my $fixed_packet_size = $ARGV[6]; # all nodes have the same packet size defined in @fpl (=1) or a randomly selected (=0)
+my $packet_size = $ARGV[9]; # default packet size if fixed_packet_size=1 or avg packet size if fixed_packet_size=0 (Bytes)
+my $packet_size_distr = $ARGV[7]; # uniform / normal (applicable if fixed_packet_size=0)
 my $avg_pkt = 0; # actual average packet size
 my %sorted_t = (); # keys = channels, values = list of nodes
 my @recents = ();
-my $auto_simtime = $ARGV[9]; # 1 = the simulation will automatically stop (useful when sim_time>>10000)
+my $auto_simtime = $ARGV[8]; # 1 = the simulation will automatically stop (useful when sim_time>>10000)
 my %sf_retrans = (); # number of retransmissions per SF
 
 # application server
@@ -960,7 +960,7 @@ sub bwconv{
 }
 
 sub read_data{
-	my $terrain_file = $ARGV[3];
+	my $terrain_file = $ARGV[-1];
 	open(FH, "<$terrain_file") or die "Error: could not open terrain file $terrain_file\n";
 	my @nodes = ();
 	my @gateways = ();
@@ -1060,7 +1060,7 @@ sub generate_picture{
 		$im->rectangle($x-5, $y-5, $x+5, $y+5, $red);
 		$im->string(gdGiantFont,$x-2,$y-20,$g,$blue);
 	}
-	my $output_file = $ARGV[3]."-img.svg";
+	my $output_file = $ARGV[-1]."-img.svg";
 	open(FILEOUT, ">$output_file") or die "could not open file $output_file for writing!";
 	binmode FILEOUT;
 	print FILEOUT $im->svg;

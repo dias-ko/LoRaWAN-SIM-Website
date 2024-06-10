@@ -2,6 +2,12 @@
 {% from 'bootstrap5/form.html' import render_form %}
 
 {% block content %}
+{% if tab == 'Simulate' %}
+<div id="loading-screen" class="visually-hidden d-flex">
+  <div class="spinner-border text-primary visually-hidden" role="status"></div>
+</div>
+{% endif %}
+
 <div class="container-md">
   <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -215,6 +221,13 @@
             options.firstChild.selected = true;
           }
       });
+
+      document.getElementById('submit').addEventListener('click', function () {
+            // document.getElementById('loading-screen').classList.remove('visually-hidden');
+            loading = document.getElementById('loading-screen');
+            loading.classList.remove("visually-hidden");
+            loading.querySelector(".visually-hidden").classList.remove("visually-hidden");
+        });
   });
 </script>
 {% endif %}
@@ -291,6 +304,18 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+#loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1050;
 }
 
 </style>

@@ -80,7 +80,7 @@ class SimulationForm(FlaskForm):
     frequency = RadioField('Frequency Plan', choices=[('eu', 'EU868'), ('us', 'US915')], validators=[DataRequired()], default='eu', id='freq')
     packets_per_hour = IntegerField('Packets per hour ', validators=[DataRequired(), NumberRange(min=1, max=1800)], default=10)
     auto_simtime = BooleanField('Auto Simulation Time', id='auto_sim')
-    simulation_time = IntegerField('Simulation Time (s)', default=3600, validators=[DataRequired(), NumberRange(min=3600, max=3600*24*10)], id='sim')
+    simulation_time = IntegerField('Simulation Time (hours)', default=1, validators=[DataRequired(), NumberRange(min=1, max=240)], id='sim')
     ack_policy = SelectField('Acknowledgement Policy', choices=[('1', 'First-Come First-Served (RCFS)'), ('2', 'Best Received Signal Strength Indicator (RSSI)'), ('3', 'Least busy Gateway')], validators=[DataRequired()], id='policy', default='1')
     max_retr = IntegerField('Max Retries', validators=[DataRequired(), NumberRange(min=1, max=8),], default=8)
     channels = SelectField('Number of Channels', choices=[('3', '3'), ('8', '8')], validators=[DataRequired()], default='8')
@@ -153,10 +153,14 @@ def simulate():
         auto_simtime = 0 if form.auto_simtime.data == False else 1
         packet_size = form.packet_size.data
         confirmed_perc = form.confirmed_perc.data / 100
-        script_name = 'LoRaWAN.pl' if form.frequency.data == 'eu' else 'LoRaWAN-US915.pl'
+        if form.frequency.data == 'eu':
+            script_name = 'LoRaWAN.pl'
+        else: 
+            script_name = 'LoRaWAN-US915.pl'
+            simulation_time = round(simulation_time*3600)
         if os.path.exists(file): 
             try:
-                res = subprocess.check_output(['perl ' + script_name + ' ' + str(packets_per_hour) + ' ' + str(simulation_time) + ' ' + str(ack_policy) + ' ' + file + ' ' + str(max_retr) + ' ' + str(channels) + ' ' + str(rx2sf) + ' ' + str(fixed_packet_size) + ' ' + str(packet_size_distr) + ' ' + str(auto_simtime) + ' ' + str(packet_size) + ' ' + str(confirmed_perc)], shell=True)
+                res = subprocess.check_output(['perl ' + script_name + ' ' + str(packets_per_hour) + ' ' + str(simulation_time) + ' ' + str(ack_policy) + ' ' + str(max_retr) + ' ' + str(channels) + ' ' + str(rx2sf) + ' ' + str(fixed_packet_size) + ' ' + str(packet_size_distr) + ' ' + str(auto_simtime) + ' ' + str(packet_size) + ' ' + str(confirmed_perc) + ' ' + file], shell=True, timeout=30)
                 session['result'] = parse_res(res)
             except subprocess.CalledProcessError as e:
                 message = e
